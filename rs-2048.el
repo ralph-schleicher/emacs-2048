@@ -4,7 +4,7 @@
 
 ;; Author: Ralph Schleicher <rs@ralph-schleicher.de>
 ;; Keywords: games
-;; Version: (beta)
+;; Version: 1.0
 
 ;; This file is not part of GNU Emacs.
 
