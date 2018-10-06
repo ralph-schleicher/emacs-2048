@@ -156,11 +156,11 @@ means that the game stopped unconditionally.")
 (defun rs-2048-state ()
   "Return the current game state."
   ;; TODO: Save random state, too.
-  `((rs-2048-board ,(copy-sequence rs-2048-board))
-    (rs-2048-score ,rs-2048-score)
-    (rs-2048-moves ,rs-2048-moves)
-    (rs-2048-game-won-p ,rs-2048-game-won-p)
-    (rs-2048-game-over-p ,rs-2048-game-over-p)))
+  `((rs-2048-board . ,(copy-sequence rs-2048-board))
+    (rs-2048-score . ,rs-2048-score)
+    (rs-2048-moves . ,rs-2048-moves)
+    (rs-2048-game-won-p . ,rs-2048-game-won-p)
+    (rs-2048-game-over-p . ,rs-2048-game-over-p)))
 
 (defun rs-2048-save-state (&optional state)
   "Save the current game state."
@@ -175,7 +175,7 @@ Value is true if the state has been modified."
   (let ((state (pop rs-2048-undo-list)))
     (unless (null state)
       (dolist (binding state)
-	(set (first binding) (second binding)))
+	(set (car binding) (cdr binding)))
       t)))
 
 (defun rs-2048-count-empty-tiles ()
