@@ -52,7 +52,8 @@
 
 ;;; Code:
 
-(require 'cl-lib)
+(eval-and-compile
+  (require 'cl-lib))
 
 ;;;; Customization variables.
 
@@ -184,7 +185,7 @@ Value is true if the state has been modified."
     (dolist (i rs-2048-normal-indices)
       (dolist (j rs-2048-normal-indices)
 	(when (zerop (rs-2048-get-tile i j))
-	  (incf c))))
+	  (cl-incf c))))
     c))
 
 (defun rs-2048-add-tile ()
@@ -201,19 +202,19 @@ Set ‘rs-2048-game-over-p’ to ‘full’ if the board is full."
 		  (let ((value (if (= (random 10) 0) 4 2)))
 		    (rs-2048-set-tile i j value)
 		    (throw 'done t)))
-		(decf k))))))
+		(cl-decf k))))))
       ;; If there was only one empty field, check if further moves
       ;; are possible.  Otherwise, the game is over.
       (catch 'done
 	(when (= empty 1)
 	  ;; Check horizontal slide.
 	  (dolist (i rs-2048-normal-indices)
-	    (dolist (j (rest rs-2048-normal-indices))
+	    (dolist (j (cl-rest rs-2048-normal-indices))
 	      (when (= (rs-2048-get-tile i (1- j)) (rs-2048-get-tile i j))
 		(throw 'done t))))
 	  ;; Check vertical slide.
 	  (dolist (j rs-2048-normal-indices)
-	    (dolist (i (rest rs-2048-normal-indices))
+	    (dolist (i (cl-rest rs-2048-normal-indices))
 	      (when (= (rs-2048-get-tile (1- i) j) (rs-2048-get-tile i j))
 		(throw 'done t))))
 	  ;; No equal adjacent tiles found.
@@ -227,7 +228,7 @@ Set ‘rs-2048-game-over-p’ to ‘full’ if the board is full."
   "Slide tiles horizontally."
   (dolist (i rs-2048-normal-indices)
     (let (;; Target column for sliding tiles.
-	  (k (first column-indices))
+	  (k (cl-first column-indices))
 	  ;; Target value for merging tiles.
 	  (v 0))
       (dolist (j column-indices)
@@ -235,12 +236,12 @@ Set ‘rs-2048-game-over-p’ to ‘full’ if the board is full."
 	  (cond ((zerop value)) ;no-op
 		((= value v)
 		 ;; Merge tiles.
-		 (incf value value)
+		 (cl-incf value value)
 		 (rs-2048-set-tile i j 0)
 		 (rs-2048-set-tile i (- k step) value)
 		 (setq rs-2048-dirty t)
 		 ;; Update state variables.
-		 (incf rs-2048-score value)
+		 (cl-incf rs-2048-score value)
 		 (when (= value 2048)
 		   (setq rs-2048-game-won-p t))
 		 ;; Need a new pair.
@@ -253,7 +254,7 @@ Set ‘rs-2048-game-over-p’ to ‘full’ if the board is full."
 		   (setq rs-2048-dirty t))
 		 ;; Column K is occupied with tile value V.
 		 (setq v value)
-		 (incf k step))
+		 (cl-incf k step))
 		))))))
 
 (defun rs-2048-slide-vertically (row-indices step)
@@ -261,17 +262,17 @@ Set ‘rs-2048-game-over-p’ to ‘full’ if the board is full."
   ;; Like ‘rs-2048-slide-horizontally’, but process each column
   ;; instead of each row.
   (dolist (j rs-2048-normal-indices)
-    (let ((k (first row-indices))
+    (let ((k (cl-first row-indices))
 	  (v 0))
       (dolist (i row-indices)
 	(let ((value (rs-2048-get-tile i j)))
 	  (cond ((zerop value))
 		((= value v)
-		 (incf value value)
+		 (cl-incf value value)
 		 (rs-2048-set-tile i j 0)
 		 (rs-2048-set-tile (- k step) j value)
 		 (setq rs-2048-dirty t)
-		 (incf rs-2048-score value)
+		 (cl-incf rs-2048-score value)
 		 (when (= value 2048)
 		   (setq rs-2048-game-won-p t))
 		 (setq v 0))
@@ -281,7 +282,7 @@ Set ‘rs-2048-game-over-p’ to ‘full’ if the board is full."
 		   (rs-2048-set-tile k j value)
 		   (setq rs-2048-dirty t))
 		 (setq v value)
-		 (incf k step))
+		 (cl-incf k step))
 		))))))
 
 (defun rs-2048-move (fun &rest arg)
@@ -296,7 +297,7 @@ Set ‘rs-2048-game-over-p’ to ‘full’ if the board is full."
 	  (apply fun arg)
 	  (when rs-2048-dirty
 	    (rs-2048-save-state state)
-	    (incf rs-2048-moves)
+	    (cl-incf rs-2048-moves)
 	    (rs-2048-redisplay)
 	    (when (and (not wonp) rs-2048-game-won-p)
 	      (make-some-noise)
@@ -307,7 +308,7 @@ Set ‘rs-2048-game-over-p’ to ‘full’ if the board is full."
 	      (rs-2048-add-tile)
 	      (when rs-2048-game-over-p
 		(make-some-noise))
-	      (when (plusp rs-2048-delay)
+	      (when (cl-plusp rs-2048-delay)
 		(sit-for rs-2048-delay))
 	      (rs-2048-redisplay))))))))
 
@@ -556,7 +557,7 @@ number touch, they merge into one."
   (interactive
    (list (let ((tem (completing-read "Color theme: " '(default gabriele none) nil t nil nil 'default)))
 	   (if (stringp tem) (intern tem) tem))))
-  (ecase theme
+  (cl-ecase theme
     ((default t)
      ;; Tile background colours interpolated from CET-L17 colour map,
      ;; see «https://peterkovesi.com/projects/colourmaps/».  The grey
@@ -625,11 +626,11 @@ number touch, they merge into one."
     (when (not (null buffer))
       (with-current-buffer buffer
 	(rs-2048-redisplay))))
-  (values))
+  (cl-values))
 
 ;; Not bound.
 (defvar rs-2048-initialized)
-(eval-when (compile load eval)
+(cl-eval-when (load eval)
   (unless (boundp 'rs-2048-initialized)
     (rs-2048-color-theme 'default)
     (setq rs-2048-initialized t)))
